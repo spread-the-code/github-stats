@@ -5,7 +5,7 @@ pages:
   script:
   - npm install
   - npm run build
-  - npm run deploy
+  - now ./build --token=$NOW_TOKEN
   artifacts:
     paths:
     - public # mandatory, other folder won't work

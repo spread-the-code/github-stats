@@ -26,7 +26,7 @@
     "test": "BROWSER=\"none\" react-scripts test",
     "test:coverage": "BROWSER=\"none\" react-scripts test --coverage",
     "eject": "react-scripts eject",
-    "deploy": "now --token=$NOW_TOKEN"
+    "deploy": "now ./build --token=$NOW_TOKEN"
   },
   "eslintConfig": {
     "extends": "react-app"
