@@ -11,6 +11,12 @@ const useStyles = makeStyles((theme: Theme) =>
       paddingTop: 40,
       paddingBottom: 40
     },
+    title: {
+      display: 'block',
+      width: '100%',
+      textAlign: 'center',
+      marginBottom: 0
+    },
     form: {
       padding: '2px 4px',
       display: 'flex',
@@ -63,9 +69,9 @@ function Home() {
     <div className={classes.root}>
       <Container maxWidth="md">
         <Grid container justify="center" alignItems="center">
-          <h1>GitHub Stat</h1>
+          <h1 className={classes.title}>GitHub Stat</h1>
           <p>
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+            GitHub Stat is tool that let you visualize your repositories statatistics.
           </p>
         </Grid>
         <Grid container>

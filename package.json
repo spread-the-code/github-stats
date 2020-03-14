@@ -45,6 +45,7 @@
   },
   "devDependencies": {
     "enzyme-to-json": "^3.4.4",
+    "now": "^17.0.4",
     "ts-jest": "^25.2.1"
   }
 }
