@@ -5,8 +5,7 @@ pages:
   script:
   - npm install
   - npm run build
-  - rm -rf public
-  - mv build public
+  - npm run deploy
   artifacts:
     paths:
     - public # mandatory, other folder won't work

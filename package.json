@@ -2,7 +2,6 @@
   "name": "githubstat",
   "version": "0.1.0",
   "private": true,
-  "homepage": "http://shayanypn.gitlab.io/githubstat",
   "dependencies": {
     "@material-ui/core": "^4.9.5",
     "@material-ui/icons": "^4.9.1",
@@ -23,10 +22,11 @@
   },
   "scripts": {
     "start": "BROWSER=\"none\" react-scripts start",
-    "build": "react-scripts build",
+    "build": "PUBLIC_URL=\"./\" react-scripts build",
     "test": "BROWSER=\"none\" react-scripts test",
     "test:coverage": "BROWSER=\"none\" react-scripts test --coverage",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "deploy": "now --token=$NOW_TOKEN"
   },
   "eslintConfig": {
     "extends": "react-app"
