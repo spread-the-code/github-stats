@@ -11,6 +11,7 @@ import {
   Button,
   Avatar,
 } from '@material-ui/core';
+import { Link } from 'react-router-dom'
 
 const useStyles = makeStyles({
   table: {
@@ -55,9 +56,11 @@ const RepoTable: React.FC<IProps> = ({ data }) => {
                 {row.owner.login}
               </TableCell>
               <TableCell align="left">
-                <Button variant="contained" color="primary">
-                  View Stat
-                </Button>
+                <Link to={`/stat/${row.full_name}`} >
+                  <Button  variant="contained" color="primary" >
+                    View Stat
+                  </Button>
+                </Link>
               </TableCell>
             </TableRow>
           ))}
