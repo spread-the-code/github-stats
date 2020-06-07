@@ -1,7 +1,8 @@
 {
-  "name": "githubstat",
+  "name": "github-stats",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
+  "homepage": "https://spread-the-code.github.io/github-stats",
   "dependencies": {
     "@material-ui/core": "^4.9.5",
     "@material-ui/icons": "^4.9.1",
@@ -29,7 +30,9 @@
     "test": "BROWSER=\"none\" react-scripts test",
     "test:coverage": "BROWSER=\"none\" react-scripts test --coverage",
     "eject": "react-scripts eject",
-    "deploy": "now ./build --token=$NOW_TOKEN"
+    "predeploy": "npm run build",
+    "deploy:now": "now ./build --token=$NOW_TOKEN",
+    "deploy:github": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -48,6 +51,7 @@
   },
   "devDependencies": {
     "enzyme-to-json": "^3.4.4",
+    "gh-pages": "^3.0.0",
     "now": "^17.0.4",
     "ts-jest": "^25.2.1"
   }
