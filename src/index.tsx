@@ -4,18 +4,33 @@ import { HashRouter as Router, Route, Switch } from 'react-router-dom'
 import * as serviceWorker from './serviceWorker';
 import Home from './Pages/Home';
 import Stat from './Pages/Stat';
+import CssBaseline from "@material-ui/core/CssBaseline";
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+
+const theme = createMuiTheme({
+  overrides: {
+    MuiCssBaseline: {
+      '@global': {
+        html: {
+          backgroundColor: '#efefef',
+        },
+      },
+    },
+  },
+});
 
 class App extends React.Component {
   render() {
     return (
-      <Router>
-        <div>
-          <Switch>
-            <Route exact path="/" component={Home} />
-            <Route exact path="/stat/:user/:repo" component={Stat} />
-          </Switch>
-        </div>
-      </Router>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+          <Router>
+            <Switch>
+              <Route exact path="/" component={Home} />
+              <Route exact path="/stat/:user/:repo" component={Stat} />
+            </Switch>
+          </Router>
+      </ThemeProvider>
     );
   }
 }

@@ -18,8 +18,15 @@ import Chart from "react-google-charts";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    root: {
+      flexGrow: 1,
+      paddingTop: 40,
+      paddingBottom: 40,
+      backgroundColor: '#efefef'
+    },
     card: {
-      width: '100%'
+      width: '100%',
+      backgroundColor: '#fff'
     },
     title: {
       display: 'block',

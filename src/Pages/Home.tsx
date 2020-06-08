@@ -9,7 +9,8 @@ const useStyles = makeStyles((theme: Theme) =>
     root: {
       flexGrow: 1,
       paddingTop: 40,
-      paddingBottom: 40
+      paddingBottom: 40,
+      backgroundColor: '#efefef'
     },
     title: {
       display: 'block',
