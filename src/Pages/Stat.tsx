@@ -18,12 +18,6 @@ import Chart from "react-google-charts";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    root: {
-      flexGrow: 1,
-      paddingTop: 40,
-      paddingBottom: 40,
-      backgroundColor: '#efefef'
-    },
     card: {
       width: '100%',
       backgroundColor: '#fff'
@@ -83,12 +77,9 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
     data: [[]]
   });
 
-
   const handleBack = () => history.push('/');
 
-  const handleVersionChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    prepareAsset(event.target.value as number);
-  };
+  const handleVersionChange = (event: React.ChangeEvent<{ value: unknown }>) => prepareAsset(event.target.value as number);
 
   const prepareAsset = (id:number) => {
     const release:any = releases.find((item:any) => item.id === id);
@@ -122,11 +113,8 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
   const fetchReleases = (user:string, repo: string) => {
     fetch(`https://api.github.com/repos/${user}/${repo}/releases`)
       .then(res => res.json())
-      .then((result) => {
-          setReleases(result);
-        },
-        (error) => {
-        }
+      .then((result) => setReleases(result),
+        (error) => {}
       )
   };
 

@@ -62,7 +62,7 @@ const Form: React.FC<IProps> = ({ onSubmit, onClear }) => {
         className={classes.input}
         autoFocus
         placeholder="Search in GitHub repositories"
-        inputProps={{ 'aria-label': 'Search in GitHub repositories' }}
+        inputProps={{ 'aria-label': 'Search in GitHub repositories and press Enter' }}
         value={query}
         onChange={(event) => setQuery(event.target.value)}
       />

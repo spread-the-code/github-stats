@@ -47,13 +47,13 @@ function Home() {
   });
 
   const handleSearch = (query:string) => {
-
     fetch(`https://api.github.com/search/repositories?q=${query}`)
       .then(res => res.json())
       .then((result) => {
           setRepositories(result);
         },
         (error) => {
+          console.error(error)
         }
       )
   };

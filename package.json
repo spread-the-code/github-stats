@@ -32,7 +32,7 @@
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
     "deploy:now": "now ./build --token=$NOW_TOKEN",
-    "deploy:github": "gh-pages -d build"
+    "deploy:github": "npm run build && gh-pages -d build"
   },
   "eslintConfig": {
     "extends": "react-app"
