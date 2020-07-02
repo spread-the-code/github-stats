@@ -137,8 +137,10 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
   React.useEffect(()=> {
     const { user, repo } = match.params;
 
-    if (user && repo )
+    if (user && repo ){
       fetchReleases(user, repo);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [match.params.user, match.params.repo]);
 
   React.useEffect(()=> {
@@ -146,6 +148,7 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
       const release:any = releases[0];
       prepareAsset(release.id);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [releases.length]);
 
   return (
@@ -153,7 +156,9 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
       <Header />
       {
         isLoading 
-        ? (<CircularProgress />)
+        ? (<Grid container justify="center">
+          <CircularProgress />
+        </Grid>)
         : (
           <Grid container style={{ paddingTop: 20 }}>
             <Card className={classes.card}>

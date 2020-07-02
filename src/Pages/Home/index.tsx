@@ -82,8 +82,15 @@ function Home() {
           />
         </Grid>
         <Grid container style={{ paddingTop: 20 }}>
-          {(repositories.items.length && !isLoading) ? (<RepoTable data={repositories} />) : ''}
-          {isLoading && (<CircularProgress />)}
+          {
+            (repositories.items.length && !isLoading) 
+            ? (<RepoTable data={repositories} />) 
+            : ''
+          }
+        </Grid>
+        <Grid container justify="center">
+          {isLoading 
+            && (<CircularProgress />)}
         </Grid>
       </Container>
     </div>
