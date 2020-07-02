@@ -6,18 +6,26 @@ import {
   Card,
   MenuItem,
   FormControl,
-  Select
+  Select,
+  CircularProgress,
+  CardHeader,
+  CardContent,
+  Avatar,
+  IconButton
 } from '@material-ui/core';
-import CardHeader from '@material-ui/core/CardHeader';
-import CardContent from '@material-ui/core/CardContent';
-import Avatar from '@material-ui/core/Avatar';
-import IconButton from '@material-ui/core/IconButton';
 import { red } from '@material-ui/core/colors';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import Chart from "react-google-charts";
+import Chart from 'react-google-charts';
+import Header from '../../Components/Header';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    root: {
+      flexGrow: 1,
+      paddingTop: 40,
+      paddingBottom: 40,
+      backgroundColor: '#efefef'
+    },
     card: {
       width: '100%',
       backgroundColor: '#fff'
@@ -68,6 +76,7 @@ const nameFilter = (name:string) => (Object.keys(validExt).find(x => name.indexO
 
 const Stat: React.FC<IProps> = ({ match, history }) => {
   const classes = useStyles();
+  const [isLoading, setIsLoading] = React.useState(false);  
   const [releases, setReleases] = React.useState([]);
   const [chartData, setChartData] = React.useState({
     user: '',
@@ -107,22 +116,31 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
         ...data
       ]
     });
+    setIsLoading(false);
   }
 
 
   const fetchReleases = (user:string, repo: string) => {
+    setIsLoading(true);
     fetch(`https://api.github.com/repos/${user}/${repo}/releases`)
       .then(res => res.json())
-      .then((result) => setReleases(result),
-        (error) => {}
+      .then(
+        (result) => {
+          setReleases(result);
+        },
+        (error) => {
+          setIsLoading(false);
+        }
       )
   };
 
   React.useEffect(()=> {
     const { user, repo } = match.params;
 
-    if (user && repo )
+    if (user && repo ){
       fetchReleases(user, repo);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [match.params.user, match.params.repo]);
 
   React.useEffect(()=> {
@@ -130,71 +148,75 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
       const release:any = releases[0];
       prepareAsset(release.id);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [releases.length]);
 
   return (
-    <Container maxWidth="md">
-      <Grid container justify="center" alignItems="center">
-        <h1 className={classes.title}>GitHub Stat</h1>
-        <p>
-          GitHub Stat is tool that let you visualize your repositories statatistics.
-        </p>
-      </Grid>
-      <Grid container style={{ paddingTop: 20 }}>
-        <Card className={classes.card}>
-          <CardHeader
-            avatar={
-              <Avatar
-                aria-label="recipe"
-                className={classes.avatar}
-                src={chartData.avatar}
-              >
-                R
-              </Avatar>
-            }
-            action={
-              <>
-              <IconButton aria-label="back" onClick={() => handleBack()}>
-                <ArrowBackIcon />
-              </IconButton>
-              <FormControl className={classes.formControl}>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={chartData.version}
-                  onChange={handleVersionChange}
-                >
-                  {releases.map((item:any)=> (<MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>))}
-                </Select>
-              </FormControl>
-              </>
-            }
-            title={chartData.user}
-            subheader={chartData.repo}
-          />
-          <CardContent>
-              <Chart
-                width="100%"
-                height={300}
-                chartType="ColumnChart"
-                loader={<div>Loading Chart</div>}
-                data={chartData.data}
-                options={{
-                  title: ' ',
-                  chartArea: { width: '100%' },
-                  hAxis: {
-                    title: '',
-                    minValue: 0,
-                  },
-                  vAxis: {
-                    title: ' ',
-                  },
-                }}
-                legendToggle
+    <Container className={classes.root} maxWidth="md">
+      <Header />
+      {
+        isLoading 
+        ? (<Grid container justify="center">
+          <CircularProgress />
+        </Grid>)
+        : (
+          <Grid container style={{ paddingTop: 20 }}>
+            <Card className={classes.card}>
+              <CardHeader
+                avatar={
+                  <Avatar
+                    aria-label="recipe"
+                    className={classes.avatar}
+                    src={chartData.avatar}
+                  >
+                    R
+                  </Avatar>
+                }
+                action={
+                  <>
+                  <IconButton aria-label="back" onClick={() => handleBack()}>
+                    <ArrowBackIcon />
+                  </IconButton>
+                  <FormControl className={classes.formControl}>
+                    <Select
+                      labelId="demo-simple-select-label"
+                      id="demo-simple-select"
+                      value={chartData.version}
+                      onChange={handleVersionChange}
+                    >
+                      {releases.map((item:any)=> (<MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>))}
+                    </Select>
+                  </FormControl>
+                  </>
+                }
+                title={chartData.user}
+                subheader={chartData.repo}
               />
-          </CardContent>
-        </Card>
-      </Grid>
+              <CardContent>
+                <Chart
+                    width="100%"
+                    height={300}
+                    chartType="ColumnChart"
+                    loader={<div>Loading Chart</div>}
+                    data={chartData.data}
+                    options={{
+                      title: ' ',
+                      chartArea: { width: '100%' },
+                      hAxis: {
+                        title: '',
+                        minValue: 0,
+                      },
+                      vAxis: {
+                        title: ' ',
+                      },
+                    }}
+                    legendToggle
+                  />
+              </CardContent>
+            </Card>
+          </Grid>
+        )
+      }
     </Container>
   );
 }

@@ -1,8 +1,9 @@
 import React from 'react';
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
-import { Container, Grid } from '@material-ui/core';
-import Form from '../Components/Form';
-import RepoTable from '../Components/RepoTable';
+import { Container, Grid, CircularProgress } from '@material-ui/core';
+import Form from '../../Components/Form';
+import { RepoTable } from '../../Components/Table';
+import Header from '../../Components/Header';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -40,6 +41,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 function Home() {
   const classes = useStyles();
+  const [isLoading, setIsLoading] = React.useState(false);
   const [repositories, setRepositories] = React.useState({
     incomplete_results: false,
     items: [],
@@ -47,13 +49,16 @@ function Home() {
   });
 
   const handleSearch = (query:string) => {
+    setIsLoading(true);
     fetch(`https://api.github.com/search/repositories?q=${query}`)
       .then(res => res.json())
       .then((result) => {
           setRepositories(result);
+          setIsLoading(false);
         },
         (error) => {
           console.error(error)
+          setIsLoading(false);
         }
       )
   };
@@ -69,12 +74,7 @@ function Home() {
   return (
     <div className={classes.root}>
       <Container maxWidth="md">
-        <Grid container justify="center" alignItems="center">
-          <h1 className={classes.title}>GitHub Stat</h1>
-          <p>
-            GitHub Stat is tool that let you visualize your repositories statatistics.
-          </p>
-        </Grid>
+        <Header />
         <Grid container>
           <Form
             onSubmit={handleSearch}
@@ -83,10 +83,14 @@ function Home() {
         </Grid>
         <Grid container style={{ paddingTop: 20 }}>
           {
-            repositories.items.length
-            ? (<RepoTable data={repositories} />)
-            : 'No item found!'
+            (repositories.items.length && !isLoading) 
+            ? (<RepoTable data={repositories} />) 
+            : ''
           }
+        </Grid>
+        <Grid container justify="center">
+          {isLoading 
+            && (<CircularProgress />)}
         </Grid>
       </Container>
     </div>
