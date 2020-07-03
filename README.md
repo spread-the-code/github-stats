@@ -7,10 +7,10 @@ A simple project present GitHub projects download static regarding of their desi
 Please check deployed version
 [Preview](https://github-state.netlify.app/)
 
-![screen record of preview](https://github.com/spread-the-code/github-stats/blob/master/preview01.png)
+![screen record of preview](https://raw.githubusercontent.com/spread-the-code/github-stats/master/preview01.png)
 
 
-![screen record of preview](https://github.com/spread-the-code/github-stats/blob/master/preview02.png)
+![screen record of preview](https://raw.githubusercontent.com/spread-the-code/github-stats/master/preview02.png)
 
 
 ## Available Scripts
