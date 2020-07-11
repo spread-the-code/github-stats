@@ -71,9 +71,27 @@ interface IProps {
   history: any
 }
 
-const validExt = {'.AppImage': 'Linux', '.exe': 'Windows', '.dmg': 'Mac'};
-const nameFilter = (name:string) => (Object.keys(validExt).find(x => name.indexOf(x) !== -1) || '');
+interface IExtension {
+  name: string,
+  color: string
+}
 
+const validExt:Record<string, IExtension> = {
+  '.AppImage': {
+    name: 'Linux',
+    color: '#A88C46'
+  },
+  '.exe': {
+    name: 'Windows',
+    color: '#F2C62E'
+  },
+  '.dmg': {
+    name: 'Mac',
+    color: '#E27827'
+  }
+};
+
+const nameFilter = (name:string) => (Object.keys(validExt).find(x => name.indexOf(x) !== -1) || '');
 const Stat: React.FC<IProps> = ({ match, history }) => {
   const classes = useStyles();
   const [isLoading, setIsLoading] = React.useState(false);  
@@ -104,7 +122,14 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
     const data = assets
       .filter((item:any) => (item.name.indexOf('.exe.blockmap') === -1 && nameFilter(item.name)))
       .map((item:any) => ({...item, ext: nameFilter(item.name)}))
-      .map((item:any) => ([item.ext, item.download_count]));
+      .map((item:any) => {
+        const extension:any = validExt[item.ext];
+        return [
+          (extension.name || item.ext),
+          item.download_count,
+          (extension.color || '#34595A')
+        ];
+      });
 
     setChartData({
       user: user,
@@ -112,7 +137,7 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
       avatar: avatar,
       version: id,
       data: [
-        ['OS', 'Download'],
+        ['OS', 'Download', { role: "style" }],
         ...data
       ]
     });
