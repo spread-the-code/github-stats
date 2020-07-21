@@ -15,8 +15,39 @@ import {
 } from '@material-ui/core';
 import { red } from '@material-ui/core/colors';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import Chart from 'react-google-charts';
+// import Chart from 'react-google-charts';
 import Header from '../../Components/Header';
+import * as Highcharts from 'highcharts';
+import HighchartsReact from 'highcharts-react-official';
+
+
+const default_options: Highcharts.Options =  {
+    chart: {
+      type: 'column'
+    },
+    title: {
+      text: ' '
+    },
+    xAxis: {
+      categories: []
+      // categories: ['Apples', 'Oranges', 'Pears', 'Grapes', 'Bananas']
+    },
+    yAxis: {
+        min: 0,
+        title: {text: ' '}
+    },
+    tooltip: {
+      pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.percentage:.0f}%)<br/>',
+      shared: true
+    },
+    series: []
+    // {
+    //   type: 'column',
+    //   name: 'Download',
+    //   data: [5, 3, 4, 7, 2]
+    // }
+};
+
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -96,13 +127,14 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
   const classes = useStyles();
   const [isLoading, setIsLoading] = React.useState(false);  
   const [releases, setReleases] = React.useState([]);
-  const [chartData, setChartData] = React.useState({
+  const [model, setModel] = React.useState({
     user: '',
     repo: '',
     avatar: '',
     version: 0,
     data: [[]]
   });
+  const [chartOption, setChartOption] = React.useState(default_options);
 
   const handleBack = () => history.push('/');
 
@@ -131,7 +163,22 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
         ];
       });
 
-    setChartData({
+
+      console.log('data', data);
+
+    setChartOption(prevStat => ({
+      ...prevStat,
+      xAxis: {
+        categories: data.map((item:any) => item[0])
+      },
+      series: [{
+        type: 'column',
+        name: 'Download',
+        data: data.map((item:any) => item[1])
+      }]
+    }));
+
+    setModel({
       user: user,
       repo: repo,
       avatar: avatar,
@@ -192,7 +239,7 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
                   <Avatar
                     aria-label="recipe"
                     className={classes.avatar}
-                    src={chartData.avatar}
+                    src={model.avatar}
                   >
                     R
                   </Avatar>
@@ -206,7 +253,7 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
                     <Select
                       labelId="demo-simple-select-label"
                       id="demo-simple-select"
-                      value={chartData.version}
+                      value={model.version}
                       onChange={handleVersionChange}
                     >
                       {releases.map((item:any)=> (<MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>))}
@@ -214,29 +261,14 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
                   </FormControl>
                   </>
                 }
-                title={chartData.user}
-                subheader={chartData.repo}
+                title={model.user}
+                subheader={model.repo}
               />
               <CardContent>
-                <Chart
-                    width="100%"
-                    height={300}
-                    chartType="ColumnChart"
-                    loader={<div>Loading Chart</div>}
-                    data={chartData.data}
-                    options={{
-                      title: ' ',
-                      chartArea: { width: '100%' },
-                      hAxis: {
-                        title: '',
-                        minValue: 0,
-                      },
-                      vAxis: {
-                        title: ' ',
-                      },
-                    }}
-                    legendToggle
-                  />
+                <HighchartsReact
+                    highcharts={Highcharts}
+                    options={chartOption}
+                />
               </CardContent>
             </Card>
           </Grid>
