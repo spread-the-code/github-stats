@@ -158,29 +158,25 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
 
     const data = assets
       .filter((item:any) => (item.name.indexOf('.exe.blockmap') === -1 && nameFilter(item.name)))
-      .map((item:any) => ({...item, ext: nameFilter(item.name)}))
       .map((item:any) => {
-        const extension:any = validExt[item.ext];
-        return [
-          (extension.name || item.ext),
-          item.download_count,
-          (extension.color || '#34595A')
-        ];
+        const extension_name:string = nameFilter(item.name);
+        const extension:IExtension = validExt[extension_name];
+        return {
+          name: (extension.name || item.ext),
+          y: item.download_count,
+          color: (extension.color || '#34595A')
+        };
       });
-
 
     setChartOption(prevStat => ({
       ...prevStat,
       xAxis: {
-        categories: data.map((item:any) => item[0])
+        categories: data.map(({ name }: { name: string}) => name)
       },
       series: [{
         type: 'column',
         name: 'Download',
-        data: data.map((item:any) => ({
-          y: item[1],
-          color: item[2]
-        }))
+        data: data.map(({y, color}: { y: number, color: string}) => ({ y, color }))
       }]
     }));
 
@@ -203,12 +199,8 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
     fetch(`https://api.github.com/repos/${user}/${repo}/releases`)
       .then(res => res.json())
       .then(
-        (result) => {
-          setReleases(result);
-        },
-        (error) => {
-          setIsLoading(false);
-        }
+        result => setReleases(result),
+        error => setIsLoading(false)
       )
   };
 
