@@ -15,11 +15,9 @@ import {
 } from '@material-ui/core';
 import { red } from '@material-ui/core/colors';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-// import Chart from 'react-google-charts';
 import Header from '../../Components/Header';
 import * as Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-
 
 const default_options: Highcharts.Options =  {
     chart: {
@@ -30,22 +28,29 @@ const default_options: Highcharts.Options =  {
     },
     xAxis: {
       categories: []
-      // categories: ['Apples', 'Oranges', 'Pears', 'Grapes', 'Bananas']
     },
     yAxis: {
         min: 0,
         title: {text: ' '}
     },
     tooltip: {
-      pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.percentage:.0f}%)<br/>',
+      pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> <br/>',
       shared: true
     },
+    legend: {
+      enabled: false
+    },
+    credits: {
+      enabled: false      
+    },
+    plotOptions: {
+        column: {
+            dataLabels: {
+                enabled: true
+            }
+        }
+    },
     series: []
-    // {
-    //   type: 'column',
-    //   name: 'Download',
-    //   data: [5, 3, 4, 7, 2]
-    // }
 };
 
 
@@ -164,8 +169,6 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
       });
 
 
-      console.log('data', data);
-
     setChartOption(prevStat => ({
       ...prevStat,
       xAxis: {
@@ -174,7 +177,10 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
       series: [{
         type: 'column',
         name: 'Download',
-        data: data.map((item:any) => item[1])
+        data: data.map((item:any) => ({
+          y: item[1],
+          color: item[2]
+        }))
       }]
     }));
 
