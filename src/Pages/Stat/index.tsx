@@ -157,7 +157,7 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
     const { user, repo } = match.params;
 
     const data = assets
-      .filter((item:any) => (item.name.indexOf('.exe.blockmap') === -1 && nameFilter(item.name)))
+      .filter((item:any) => (!item.name.includes('.exe.blockmap') && nameFilter(item.name)))
       .map((item:any) => {
         const extension_name:string = nameFilter(item.name);
         const extension:IExtension = validExt[extension_name];
