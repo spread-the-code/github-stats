@@ -15,8 +15,44 @@ import {
 } from '@material-ui/core';
 import { red } from '@material-ui/core/colors';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import Chart from 'react-google-charts';
 import Header from '../../Components/Header';
+import * as Highcharts from 'highcharts';
+import HighchartsReact from 'highcharts-react-official';
+
+const default_options: Highcharts.Options =  {
+    chart: {
+      type: 'column'
+    },
+    title: {
+      text: ' '
+    },
+    xAxis: {
+      categories: []
+    },
+    yAxis: {
+        min: 0,
+        title: {text: ' '}
+    },
+    tooltip: {
+      pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> <br/>',
+      shared: true
+    },
+    legend: {
+      enabled: false
+    },
+    credits: {
+      enabled: false      
+    },
+    plotOptions: {
+        column: {
+            dataLabels: {
+                enabled: true
+            }
+        }
+    },
+    series: []
+};
+
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -71,20 +107,39 @@ interface IProps {
   history: any
 }
 
-const validExt = {'.AppImage': 'Linux', '.exe': 'Windows', '.dmg': 'Mac'};
-const nameFilter = (name:string) => (Object.keys(validExt).find(x => name.indexOf(x) !== -1) || '');
+interface IExtension {
+  name: string,
+  color: string
+}
 
+const validExt:Record<string, IExtension> = {
+  '.AppImage': {
+    name: 'Linux',
+    color: '#A88C46'
+  },
+  '.exe': {
+    name: 'Windows',
+    color: '#F2C62E'
+  },
+  '.dmg': {
+    name: 'Mac',
+    color: '#E27827'
+  }
+};
+
+const nameFilter = (name:string) => (Object.keys(validExt).find(x => name.indexOf(x) !== -1) || '');
 const Stat: React.FC<IProps> = ({ match, history }) => {
   const classes = useStyles();
   const [isLoading, setIsLoading] = React.useState(false);  
   const [releases, setReleases] = React.useState([]);
-  const [chartData, setChartData] = React.useState({
+  const [model, setModel] = React.useState({
     user: '',
     repo: '',
     avatar: '',
     version: 0,
     data: [[]]
   });
+  const [chartOption, setChartOption] = React.useState(default_options);
 
   const handleBack = () => history.push('/');
 
@@ -102,17 +157,36 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
     const { user, repo } = match.params;
 
     const data = assets
-      .filter((item:any) => (item.name.indexOf('.exe.blockmap') === -1 && nameFilter(item.name)))
-      .map((item:any) => ({...item, ext: nameFilter(item.name)}))
-      .map((item:any) => ([item.ext, item.download_count]));
+      .filter((item:any) => (!item.name.includes('.exe.blockmap') && nameFilter(item.name)))
+      .map((item:any) => {
+        const extension_name:string = nameFilter(item.name);
+        const extension:IExtension = validExt[extension_name];
+        return {
+          name: (extension.name || item.ext),
+          y: item.download_count,
+          color: (extension.color || '#34595A')
+        };
+      });
 
-    setChartData({
+    setChartOption(prevStat => ({
+      ...prevStat,
+      xAxis: {
+        categories: data.map(({ name }: { name: string}) => name)
+      },
+      series: [{
+        type: 'column',
+        name: 'Download',
+        data: data.map(({y, color}: { y: number, color: string}) => ({ y, color }))
+      }]
+    }));
+
+    setModel({
       user: user,
       repo: repo,
       avatar: avatar,
       version: id,
       data: [
-        ['OS', 'Download'],
+        ['OS', 'Download', { role: "style" }],
         ...data
       ]
     });
@@ -125,12 +199,8 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
     fetch(`https://api.github.com/repos/${user}/${repo}/releases`)
       .then(res => res.json())
       .then(
-        (result) => {
-          setReleases(result);
-        },
-        (error) => {
-          setIsLoading(false);
-        }
+        result => setReleases(result),
+        error => setIsLoading(false)
       )
   };
 
@@ -167,7 +237,7 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
                   <Avatar
                     aria-label="recipe"
                     className={classes.avatar}
-                    src={chartData.avatar}
+                    src={model.avatar}
                   >
                     R
                   </Avatar>
@@ -181,7 +251,7 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
                     <Select
                       labelId="demo-simple-select-label"
                       id="demo-simple-select"
-                      value={chartData.version}
+                      value={model.version}
                       onChange={handleVersionChange}
                     >
                       {releases.map((item:any)=> (<MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>))}
@@ -189,29 +259,14 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
                   </FormControl>
                   </>
                 }
-                title={chartData.user}
-                subheader={chartData.repo}
+                title={model.user}
+                subheader={model.repo}
               />
               <CardContent>
-                <Chart
-                    width="100%"
-                    height={300}
-                    chartType="ColumnChart"
-                    loader={<div>Loading Chart</div>}
-                    data={chartData.data}
-                    options={{
-                      title: ' ',
-                      chartArea: { width: '100%' },
-                      hAxis: {
-                        title: '',
-                        minValue: 0,
-                      },
-                      vAxis: {
-                        title: ' ',
-                      },
-                    }}
-                    legendToggle
-                  />
+                <HighchartsReact
+                    highcharts={Highcharts}
+                    options={chartOption}
+                />
               </CardContent>
             </Card>
           </Grid>
