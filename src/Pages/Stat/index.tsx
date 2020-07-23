@@ -15,9 +15,11 @@ import {
 } from '@material-ui/core';
 import { red } from '@material-ui/core/colors';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import Header from '../../Components/Header';
 import * as Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import Header from '../../Components/Header';
+import { definedExtensions } from '../../Constants';
+import { IExtension } from '../../Interfaces';
 
 const default_options: Highcharts.Options =  {
     chart: {
@@ -107,60 +109,51 @@ interface IProps {
   history: any
 }
 
-interface IExtension {
-  name: string,
-  color: string
-}
 
-const validExt:Record<string, IExtension> = {
-  '.AppImage': {
-    name: 'Linux',
-    color: '#A88C46'
-  },
-  '.exe': {
-    name: 'Windows',
-    color: '#F2C62E'
-  },
-  '.dmg': {
-    name: 'Mac',
-    color: '#E27827'
-  }
-};
-
-const nameFilter = (name:string) => (Object.keys(validExt).find(x => name.indexOf(x) !== -1) || '');
+const nameFilter = (name:string) => (Object.keys(definedExtensions).find(x => name.indexOf(x) !== -1) || '');
 const Stat: React.FC<IProps> = ({ match, history }) => {
   const classes = useStyles();
-  const [isLoading, setIsLoading] = React.useState(false);  
-  const [releases, setReleases] = React.useState([]);
+  const [chartOption, setChartOption] = React.useState(default_options);
   const [model, setModel] = React.useState({
+    loading: false,
     user: '',
     repo: '',
     avatar: '',
     version: 0,
-    data: [[]]
+    releases: []
   });
-  const [chartOption, setChartOption] = React.useState(default_options);
 
   const handleBack = () => history.push('/');
+  const handleReleaseChange = (event: React.ChangeEvent<{ value: unknown }>) => prepareAsset(event.target.value as number);
 
-  const handleVersionChange = (event: React.ChangeEvent<{ value: unknown }>) => prepareAsset(event.target.value as number);
+  const fetchReleases = (user:string, repo: string) => {
+    setModel(prevStat => ({
+      ...prevStat,
+      loading: true,
+    }));
+    fetch(`https://api.github.com/repos/${user}/${repo}/releases`)
+      .then(res => res.json())
+      .then(releases => {
+          setModel(prevStat => ({
+            ...prevStat,
+            user: user,
+            repo: repo,
+            avatar: releases.length ? releases[0].author.avatar_url : null,
+            releases: releases
+          }));
+        },
+        error => setModel(prevStat=>({ ...prevStat, loading: false }))
+      )
+  };
+  const prepareAsset = (release_id:number) => {
+    const release:any = model.releases.find(({ id }) => id === release_id);
+    if (!release) {return;}
 
-  const prepareAsset = (id:number) => {
-    const release:any = releases.find((item:any) => item.id === id);
-
-    if (release) {
-      prepareChartData(id, release.author.avatar_url, release.assets);
-    }
-  }
-
-  const prepareChartData = (id:number, avatar:string, assets:any) => {
-    const { user, repo } = match.params;
-
-    const data = assets
+    const data = release.assets
       .filter((item:any) => (!item.name.includes('.exe.blockmap') && nameFilter(item.name)))
       .map((item:any) => {
         const extension_name:string = nameFilter(item.name);
-        const extension:IExtension = validExt[extension_name];
+        const extension:IExtension = definedExtensions[extension_name];
         return {
           name: (extension.name || item.ext),
           y: item.download_count,
@@ -168,41 +161,23 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
         };
       });
 
-    setChartOption(prevStat => ({
-      ...prevStat,
-      xAxis: {
-        categories: data.map(({ name }: { name: string}) => name)
-      },
-      series: [{
-        type: 'column',
-        name: 'Download',
-        data: data.map(({y, color}: { y: number, color: string}) => ({ y, color }))
-      }]
-    }));
-
-    setModel({
-      user: user,
-      repo: repo,
-      avatar: avatar,
-      version: id,
-      data: [
-        ['OS', 'Download', { role: "style" }],
-        ...data
-      ]
-    });
-    setIsLoading(false);
+      setChartOption(prevStat => ({
+        ...prevStat,
+        xAxis: {
+          categories: data.map(({ name }: { name: string}) => name)
+        },
+        series: [{
+          type: 'column',
+          name: 'Download',
+          data: data.map(({y, color}: { y: number, color: string}) => ({ y, color }))
+        }]
+      }));
+      setModel(prevStat => ({
+        ...prevStat,
+        version: release_id,
+        loading: false
+      }));
   }
-
-
-  const fetchReleases = (user:string, repo: string) => {
-    setIsLoading(true);
-    fetch(`https://api.github.com/repos/${user}/${repo}/releases`)
-      .then(res => res.json())
-      .then(
-        result => setReleases(result),
-        error => setIsLoading(false)
-      )
-  };
 
   React.useEffect(()=> {
     const { user, repo } = match.params;
@@ -214,18 +189,19 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
   }, [match.params.user, match.params.repo]);
 
   React.useEffect(()=> {
-    if (releases && releases.length){
-      const release:any = releases[0];
-      prepareAsset(release.id);
+    if (model.releases && model.releases.length){
+      const { id } = model.releases[0];
+      prepareAsset(id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [releases.length]);
+  }, [model.releases]);
+
 
   return (
     <Container className={classes.root} maxWidth="md">
       <Header />
       {
-        isLoading 
+        model.loading 
         ? (<Grid container justify="center">
           <CircularProgress />
         </Grid>)
@@ -252,9 +228,9 @@ const Stat: React.FC<IProps> = ({ match, history }) => {
                       labelId="demo-simple-select-label"
                       id="demo-simple-select"
                       value={model.version}
-                      onChange={handleVersionChange}
+                      onChange={handleReleaseChange}
                     >
-                      {releases.map((item:any)=> (<MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>))}
+                      {model.releases.map((item:any)=> (<MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>))}
                     </Select>
                   </FormControl>
                   </>
